@@ -1,0 +1,114 @@
+/* Shared touch, mouse and keyboard feedback; artwork and ambient animations stay intact. */
+button:not(.operator-hotzone),
+.local-download {
+  position: relative;
+  transform-origin: center;
+  transition:
+    scale 140ms cubic-bezier(.2, .8, .3, 1),
+    translate 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+/* These elements already have absolute positioning in the screen layout. */
+.start-button, .back-button, .local-download { position: absolute !important; }
+.start-button { border-radius: 90px; }
+.back-button { border-radius: 44px; }
+.capture-button { border-radius: 50%; }
+.era-card { border-radius: 48px; }
+.result-actions button { border-radius: 18px; }
+.operator-panel header button { border-radius: 8px; }
+
+button:not(:disabled):not(.operator-hotzone):active,
+.local-download:active {
+  scale: .955;
+  translate: 0 2px;
+}
+
+.start-button:active, .capture-button:active, .era-card:active { transform: none; }
+.pill:not(:disabled):active { background-color: #244d75; }
+.text-button:not(:disabled):active, .local-download:active { color: #b67b36; }
+
+.button-click-feedback::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid #ebca8b;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: button-confirm 460ms ease-out both;
+}
+
+.text-button.button-click-feedback::after,
+.operator-panel header .button-click-feedback::after {
+  border: 0;
+  background: #d6a76833;
+  border-radius: 6px;
+}
+
+.result-actions button i,
+button > img {
+  transition: filter 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  button:not(:disabled):not(.operator-hotzone):hover,
+  .local-download:hover {
+    translate: 0 -3px;
+    scale: 1.012;
+  }
+
+  .era-card:hover { transform: none; }
+  .start-button:hover img,
+  .back-button:hover img,
+  .capture-button:hover img,
+  .era-card:hover .era-card-base {
+    filter: brightness(1.07) drop-shadow(0 5px 12px #d3a45f5c);
+  }
+
+  .pill:not(:disabled):hover {
+    background-color: #244d75;
+    border-color: #ffedc5;
+    box-shadow: 0 7px 22px #061b3c33, 0 0 0 3px #ebca8b20;
+  }
+
+  .result-actions button:not(:disabled):hover i {
+    background-color: #244d75;
+    box-shadow: 0 5px 18px #193b5d33, 0 0 0 4px #d6b57c55;
+  }
+
+  .text-button:not(:disabled):hover,
+  .local-download:hover { color: #b67b36; }
+  .operator-panel header button:hover { background-color: #e9dfcf; }
+  .operator-panel footer button:not(:disabled):hover { background-color: #28547b; box-shadow: 0 4px 12px #173d6325; }
+  .operator-panel footer .secondary:hover { background-color: #d9ccb9; }
+
+  button:not(:disabled):not(.operator-hotzone):hover:active,
+  .local-download:hover:active { scale: .955; translate: 0 2px; }
+}
+
+button:not(.operator-hotzone):focus-visible,
+.local-download:focus-visible {
+  outline: 4px solid #dca96c;
+  outline-offset: 6px;
+  box-shadow: 0 0 0 8px #dca96c22;
+}
+
+button:disabled { scale: 1; translate: 0; }
+.operator-panel input, .operator-panel select { transition: border-color 150ms ease, box-shadow 150ms ease; }
+.operator-panel input:focus, .operator-panel select:focus { outline: none; border-color: #ad8247; box-shadow: 0 0 0 3px #ad824726; }
+
+@keyframes button-confirm {
+  0% { opacity: .9; box-shadow: 0 0 0 0 #d6a76860; }
+  100% { opacity: 0; box-shadow: 0 0 0 10px #d6a76800; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button:not(.operator-hotzone), .local-download { transition: none; }
+  button:not(:disabled):not(.operator-hotzone):hover,
+  button:not(:disabled):not(.operator-hotzone):active,
+  .local-download:hover, .local-download:active { scale: 1 !important; translate: 0 !important; }
+  .button-click-feedback::after { animation: none; opacity: 0; }
+}

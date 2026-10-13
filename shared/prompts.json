@@ -1,0 +1,47 @@
+{
+  "eras": {
+    "foundations": [
+      [
+        "Downtown Cairo, 1950s: elegant Belle Epoque facades, a historic tram and period cars, warm clear daylight.",
+        "Tailored 1950s business suits, linen shirts, modest long-sleeved vintage dresses or coordinated full-length ensembles."
+      ],
+      [
+        "A leafy Garden City boulevard in 1960s Cairo, stone balconies and a classic sedan, soft golden daylight.",
+        "Refined 1960s tailored jackets, elegant fully clothed daywear in warm neutral fabrics."
+      ],
+      [
+        "An early 1970s Nile promenade with historic Cairo buildings and a felucca in the distance.",
+        "Elegant early 1970s smart attire, subtle patterns, fully covered shoulders and torsos."
+      ]
+    ],
+    "opportunities": [
+      [
+        "Cairo in the 1980s: lively downtown avenue, period taxis, shopfronts and mid-century architecture in daylight.",
+        "1980s smart-casual jackets, shirts, tailored trousers and modest blouses or long dresses, understated period styling."
+      ],
+      [
+        "Cairo Nile Corniche in the 1990s, Cairo Tower and period buildings in clear sunny light.",
+        "1990s polished business-casual clothes, textured jackets and coordinated modest outfits."
+      ],
+      [
+        "A late-1970s Heliopolis street with arcaded facades, palm trees, period cars and bright daylight.",
+        "Late-1970s tailored everyday garments and modest period dresses, warm earth tones."
+      ]
+    ],
+    "tomorrow": [
+      [
+        "Present-day Cairo Nile Corniche, Cairo Tower, contemporary skyline and a bright optimistic riverfront.",
+        "Contemporary elegant business attire, fine navy or cream tailoring, refined modest outfits."
+      ],
+      [
+        "Modern New Cairo with contemporary architecture, palms, landscaped plazas and luminous daytime light.",
+        "Modern smart-casual outfits with subtle elegant accents, fully clothed, no futuristic armor."
+      ],
+      [
+        "Contemporary Zamalek on the Nile with Cairo Tower, a tasteful urban riverfront and warm afternoon light.",
+        "Polished contemporary gala-inspired daywear in understated navy, warm beige and earth tones."
+      ]
+    ]
+  },
+  "template": "Create one photorealistic portrait for the German-Arab Chamber of Industry and Commerce (AHK Egypt) 75th anniversary photobooth. The input image is the sole identity reference.\nKeep EVERY participant and the exact number of people. Preserve their facial identity, apparent age, natural skin tone, eyes, nose, jaw, wrinkles, facial hair, hair texture, expression and gaze. Do not beautify, reshape faces, invent people, or change expressions. Keep each person immediately recognizable.\nChange ONLY attire and environment. Clothing: {{OUTFIT}}\nPreserve any religious or cultural headcover that is visible in the input, naturally draped, coordinated with the outfit. Preserve exposed hair when no headcover is present. Every person must have opaque clothing covering torso, chest and shoulders. Retain individual clothing preferences without guessing demographic labels.\nEnvironment: {{SCENE}}\nOutput a single coherent 2:3 portrait, never a collage. Match the reference pose and framing. Keep all faces inside the central safe area, at least 15% from the top and 12% from the sides for the anniversary frame. Use natural skin texture, convincing lighting and shadows, print-friendly brightness and realistic hands. No added text, dates, logos, watermark, border, spacesuits, robotic armor or extra people. An anniversary frame will be applied separately."
+}

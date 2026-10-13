@@ -1,0 +1,86 @@
+# AHK Egypt · 75th Anniversary Photobooth
+
+Portrait Electron kiosk for the German-Arab Chamber of Industry and Commerce's 75th anniversary. Uses the provided AHK artwork, era cards, fonts, animated background and anniversary frame.
+
+Visitor-facing copy must follow the supplied references and factual operating instructions. Do not add slogans, quotes, promotional claims, or decorative copy without the user's approval.
+
+## Git credentials protection
+
+Local env files/backups, operator configuration, credential files, private keys, build outputs and test artifacts are ignored. Only `.env.example` is intended for Git, with credential fields left blank. `npm run check:secrets` checks tracked and untracked commit candidates against local env credentials and common token formats without printing their values. Enable the repository's staged-file pre-commit check on another checkout with `git config core.hooksPath .githooks`. This supplements `.gitignore`, which does not remove already-tracked files. Keep `package-lock.json` tracked.
+
+## Run
+
+Requires Node.js 22.17+ and npm. All assets are stored in `public/`; no FFmpeg or asset-generation step is required. `npm run assets` validates the required files.
+
+`public/assets/` contains the app images, video, fonts, frame and preview samples. `public/ui/` contains the SVG controls. `public/references/` preserves the supplied screen references, generation references, font mapping and project description. These files are intended for Git; edit the app assets directly in `public/assets/`.
+
+```powershell
+git submodule update --init --recursive
+npm ci
+npm run assets
+npm run desktop
+```
+
+`npm run dev` opens the local browser trial at http://127.0.0.1:5173. It supports live GPT Image editing and Cloudinary/QR sharing directly from the browser, following the previous photobooth's `.env.local` approach. There are no server API routes. Local automatic archiving, printer selection and silent printing run in Electron. Visitors download photos through the QR viewer; the result screen has no direct save button.
+
+## Local browser credentials
+
+The project-root `.env.local` is git-ignored. `.env.example` lists the supported variables. Set `VITE_OPENAI_API_KEY` to the event's OpenAI key, leave `VITE_OPENAI_MODEL=gpt-image-2`, and either set `VITE_PREVIEW_MODE=false` or disable preview mode in F2. The previous project's Gemini key cannot be used for OpenAI.
+
+Cloudinary uses `VITE_CLOUDINARY_CLOUD_NAME`, `VITE_CLOUDINARY_API_KEY`, `VITE_CLOUDINARY_API_SECRET`, and `VITE_CLOUDINARY_FOLDER=AHK-75-Anniversary`. This project has its own folder and does not reuse another event's dashboard ID. Restart `npm run dev` after editing `.env.local`.
+
+F2 overrides are saved in browser localStorage, like the previous project; they take priority over env defaults and survive refreshes. F2 does not edit the env file. To return to env defaults, clear this site's browser storage. Direct `VITE_*` credential access exists only in the local development trial. The production build excludes that code and env values, and runs a credential scan on its output.
+
+Both `npm run desktop` and the portable EXE open in fullscreen kiosk mode. Set the event display to **1080 × 1920, Portrait** in Windows. The UI is designed at that exact 9:16 size and also scales proportionally for higher-resolution portrait displays. Browser previews fill the viewport with the animated background while fitting all controls inside the available area; browser chrome/window sizing does not create navy letterboxing. Tapping anywhere in the browser experience requests fullscreen and also performs the tapped control's usual action. Escape exits browser fullscreen; another tap re-enters it. Fullscreen requests are paused while F2 settings are open. F2 opens operator settings and exposes the native window controls in Electron.
+
+## Build a Windows portable EXE
+
+```powershell
+npm run electron:build
+```
+
+Output: `release/AHK-75-Photobooth-1.0.0-Portable.exe`. The executable includes all fonts and visitor-facing assets; no installation or separate web server is needed. `npm run electron:unpacked` builds a directory version.
+
+## Visitor flow
+
+Start → choose era → live camera → animated 3–2–1 → captured photo and 5-second retake window → time portal → framed portrait, QR download and print. Era/camera screens reset after 60 seconds without a tap. Results reset after 90 seconds by default, paused during printing. Camera streams stop when leaving capture. Countdown and retake timers are cancelled on navigation. Failed AI requests stay on an error screen with explicit retry/new photo controls.
+
+## Operator setup (F2)
+
+F2 exits kiosk mode and opens settings. Five taps in the upper-right corner also open the panel. Returning from settings restores kiosk mode.
+
+- **Preview mode:** enabled initially. It uses samples in `public/assets/demo-1.jpg` through `demo-3.jpg`, derived from `public/references/generations/Ref1.jpeg` and clearly marked as previews. It does not call OpenAI, upload samples or increment metrics. It tries the real camera first, then offers a sample camera feed if no camera is connected. Disable preview mode after configuring the OpenAI key.
+- **OpenAI:** add the key in F2 settings. GPT Image 2 is the default; GPT Image 1.5 is also selectable with high input fidelity. Image edits include the captured photo and an era-specific identity-preserving prompt. Requests time out after 180 seconds and are never automatically retried. `OPENAI_API_KEY` is also supported in the main-process environment. Production Electron keys are not bundled in the renderer or saved in browser storage. The separate local browser trial follows the env/localStorage workflow above.
+- **Camera:** select the physical device; choose −90°, 0°, 90° or 180° and mirrored/unmirrored. −90° is the shared skill's sideways kiosk default. The displayed canvas is exactly what is captured. Use 0° for a normal upright webcam.
+- **Printer:** select the exact installed device. Configure its Windows driver for 4 × 6 inch / borderless photo printing. Canon SELPHY CP1300/CP1500 and DNP DP-QW410 follow the shared printing skill. A hidden Electron window sends one silent portrait print job, with no margins. The button locks after a successful dispatch. Physical borderless coverage depends on the printer driver and must be calibrated on-site.
+- **QR delivery:** configure Cloudinary cloud name, API key, secret and event folder. The final framed PNG is uploaded with a main-process SHA-1 signature, up to 3 attempts with 2/4-second backoff. QR codes link to the configurable HTTPS photo viewer with `url` and `branded=true`. Without storage configuration, photos remain available locally and for printing; no dummy QR is displayed. Failed uploads can be retried from the result screen.
+- **Metrics:** optionally set the AHK event's own dashboard project UUID. Only successful live image generation reports a non-blocking metric. No other event's default UUID is reused.
+
+Electron encrypts keys using Windows `safeStorage`; configuration lives in the application's user-data folder. Credentials are not returned to the renderer after saving. Local browser F2 settings use browser localStorage instead.
+
+## Final image
+
+Compositing uses a **1200 × 1800 PNG (2:3)**. The generated 1024 × 1536 portrait is drawn first, then `Frame.png` is overlaid. The frame's baked first-era label is updated for the other eras. The same finished image is displayed, uploaded, saved and printed at 4 × 6 inches (300 pixels/inch).
+
+Electron photos are archived in `Pictures/AHK-75-Photobooth`; previews go into its `Previews` subfolder. Archives are retained until the operator removes them. Browser trials keep the current portrait in memory for cloud delivery and retry. The result screen shows gentle automatic portrait parallax, an anniversary-frame sheen, a fixed QR pattern with an animated gold surround, and an auto-reset progress line. The actual composite, upload and print data remain unchanged by these display effects.
+
+## Shared skills applied
+
+The Git submodule at `skills/5dvr-photobooth-skills` supplies screen-flow, Electron packaging, photo printing, identity-preserving prompt crafting, QR generation, Cloudinary uploads, metrics and 3D optimization guidance. Project requirements override its Gemini-specific examples. Production Electron secret handling uses the main process and Windows encryption. The local browser trial uses the previous project's env/localStorage approach. Browser and Electron generation share the same era prompts in `shared/prompts.json`. Demographic classification is not needed: prompts preserve every participant directly from the reference image.
+
+The countdown/loading gyroscope is procedural Three.js geometry with non-PBR materials, steady lights, 1200 loading particles, a limited pixel ratio and a CSS fallback on WebGL failure. Era photos use restrained paper drift; reduced-motion preferences disable decorative motion.
+
+## Validation
+
+```powershell
+npm run typecheck
+npm test
+npx playwright install chromium
+npm run test:e2e
+```
+
+End-to-end tests cover the countdown, retake cancellation, five-second auto-proceed, cancellation during loading, synthetic live camera capture, generation failure/retry, QR display, 1200 × 1800 composition, missing desktop print handling, settings and timed reset. The review screen offers only Retake; otherwise it proceeds automatically after five seconds. A production `file://` Electron integration check validates encrypted settings, IPC generation/delivery, local PNG archival and silent print dispatch with mocked API responses and a virtual printer. No integration test contacts paid image APIs or physical printers. Screenshots and the composed image are written to `artifacts/` for visual review.
+
+Live API identity quality and Cloudinary/QR downloads need the event credentials. Physical printing needs the event hardware and will be tested after browser approval. Preview mode validates the experience but is not evidence of an actual AI transformation.
+
+References: [OpenAI image edits](https://developers.openai.com/api/reference/resources/images/methods/edit), [Electron printing](https://www.electronjs.org/docs/latest/api/web-contents#contentsprintoptions-callback), [AHK Egypt](https://aegypten.ahk.de/en/).

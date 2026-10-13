@@ -1,0 +1,59 @@
+{
+  "name": "ahk-anniversary-photobooth",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AHK Egypt 75th anniversary time-travel photobooth",
+  "author": "5DVR",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "assets": "node scripts/check-assets.mjs",
+    "dev": "vite --host 127.0.0.1",
+    "desktop": "node scripts/desktop-dev.mjs",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run assets && npm run typecheck && vite build && node scripts/check-production-secrets.mjs",
+    "test": "node --test tests/*.test.cjs tests/*.test.mjs",
+    "check:secrets": "node scripts/check-git-secrets.mjs --working",
+    "test:e2e": "playwright test",
+    "electron:build": "npm run build && electron-builder --win portable",
+    "electron:unpacked": "npm run build && electron-builder --dir"
+  },
+  "build": {
+    "appId": "com.5dvr.ahk75.photobooth",
+    "productName": "AHK 75th Anniversary Photobooth",
+    "asar": true,
+    "electronDist": "node_modules/electron/dist",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "shared/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable",
+      "artifactName": "AHK-75-Photobooth-${version}-Portable.exe",
+      "signAndEditExecutable": false
+    }
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.0",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.186.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "electron": "^44.7.0",
+    "electron-builder": "^26.15.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  }
+}

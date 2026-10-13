@@ -1,0 +1,56 @@
+Start Screen
+-------------
+
+Start Button Font --> Cormorant Garamond - Semibold
+
+
+Era Screen
+-----------
+
+Choose Era Text ---> Kaisei HarunoUmi Bold
+
+Explore Partnership Text --->  Kaisei HarunoUmi Regular
+
+Era Card Title (Years) ---> Cinzel Bold
+
+Era Card Subtitle ---> Cinzel Regular
+
+
+
+Camera Capture Screen
+---------------------
+
+Back Button ---> Cinzel Bold
+
+
+
+Countdown UI 
+------------
+
+Get Ready ---> Kaisei HarunoUmi Bold
+
+Countdown Number Text ---> Cinzel Bold
+
+
+Lookt At Camera ----> Kaisei HarunoUmi Bold
+
+
+Loading Screen
+--------------
+
+Loading Text ---> Cormorant Garamond - Bold
+
+
+Result Screen
+--------------
+
+Your Photo is Ready ---> Cinzel Regular
+
+
+Scan QR Text ----> Kaisei HarunoUmi Bold
+
+
+
+
+
+

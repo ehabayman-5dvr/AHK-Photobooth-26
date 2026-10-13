@@ -1,0 +1,3 @@
+[submodule "skills/5dvr-photobooth-skills"]
+	path = skills/5dvr-photobooth-skills
+	url = https://github.com/ehabayman-5dvr/5dvr-photobooth-skills.git

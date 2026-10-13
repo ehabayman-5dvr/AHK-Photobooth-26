@@ -1,0 +1,84 @@
+.anniversary-mark {
+  aspect-ratio: 726 / 321;
+  isolation: isolate;
+  pointer-events: none;
+}
+
+.anniversary-art {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  animation: anniversary-float 9s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.anniversary-art > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.anniversary-sheen {
+  position: absolute;
+  inset: 0;
+  mask-image: var(--anniversary-mask);
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  background: linear-gradient(112deg, transparent 42%, #ffe5a13d 47%, #fff9e8b3 50%, #fff1bc45 53%, transparent 58%);
+  background-size: 280% 100%;
+  mix-blend-mode: screen;
+  animation: anniversary-sheen 10s ease-in-out infinite;
+}
+
+.anniversary-glint {
+  position: absolute;
+  width: 4.5%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  opacity: 0;
+  background: radial-gradient(circle, #fffdf2 0 8%, #ffedb99c 15%, transparent 56%);
+  filter: drop-shadow(0 0 3px #fff2bd);
+  animation: anniversary-glint 10s ease-in-out infinite;
+}
+
+.anniversary-glint::before,
+.anniversary-glint::after {
+  content: '';
+  position: absolute;
+  inset: 47% 4%;
+  background: linear-gradient(90deg, transparent, #fff9df, transparent);
+  border-radius: 50%;
+}
+
+.anniversary-glint::after { rotate: 90deg; }
+.glint-one { left: 27%; top: 7%; animation-delay: 1.8s; }
+.glint-two { left: 60%; top: 13%; width: 3.3%; animation-delay: 4.2s; }
+.glint-three { left: 84%; top: 79%; width: 3.8%; animation-delay: 6.6s; }
+
+/* Preserve the existing loading header's layout without its generic image selectors affecting the mark. */
+.loading-brand > .anniversary-mark { width: 540px; }
+.loading-brand .anniversary-art > img { width: 100%; height: 100%; }
+
+@keyframes anniversary-float {
+  0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 3px 7px #d8ac4930); }
+  50% { transform: translateY(-5px) scale(1.004); filter: drop-shadow(0 5px 12px #e7bc6250); }
+}
+
+@keyframes anniversary-sheen {
+  0%, 12% { background-position: 150% 0; opacity: 0; }
+  17% { opacity: .85; }
+  43% { background-position: -55% 0; opacity: .85; }
+  49%, 100% { background-position: -55% 0; opacity: 0; }
+}
+
+@keyframes anniversary-glint {
+  0%, 9%, 25%, 100% { opacity: 0; transform: scale(.45) rotate(-12deg); }
+  16% { opacity: .85; transform: scale(1) rotate(0); }
+  21% { opacity: .2; transform: scale(.7) rotate(8deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anniversary-art { animation: none; filter: none; }
+  .anniversary-sheen, .anniversary-glint { display: none; }
+}
