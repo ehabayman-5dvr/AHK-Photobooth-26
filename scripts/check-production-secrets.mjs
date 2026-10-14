@@ -3,7 +3,7 @@ import path from 'node:path';
 import { loadEnv } from 'vite';
 
 const env = loadEnv('production', process.cwd(), '');
-const secrets = ['VITE_OPENAI_API_KEY', 'VITE_CLOUDINARY_API_SECRET', 'VITE_CLOUDINARY_API_KEY']
+const secrets = ['VITE_GEMINI_API_KEY', 'VITE_OPENAI_API_KEY', 'VITE_CLOUDINARY_API_SECRET', 'VITE_CLOUDINARY_API_KEY']
   .map(name => ({ name, value: env[name] })).filter(entry => entry.value);
 async function scan(directory) {
   for (const file of await fs.readdir(directory, { withFileTypes: true })) {
@@ -12,7 +12,7 @@ async function scan(directory) {
     if (!/\.(js|html|json|css)$/.test(file.name)) continue;
     const content = await fs.readFile(filename, 'utf8');
     for (const secret of secrets) if (content.includes(secret.value)) throw new Error(`${secret.name} found in production output. Credential value omitted.`);
-    if (content.includes('ahk75_openai_api_key')) throw new Error('Local browser trial code found in production output.');
+    if (content.includes('ahk75_openai_api_key') || content.includes('ahk75_gemini_api_key')) throw new Error('Local browser trial code found in production output.');
   }
 }
 await scan(path.resolve('dist'));

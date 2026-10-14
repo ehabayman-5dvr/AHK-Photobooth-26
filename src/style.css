@@ -4,3 +4,11 @@
 .portal-memories{position:absolute;inset:0;pointer-events:none}.portal-memories img{position:absolute;width:190px;opacity:.35;filter:sepia(.5) drop-shadow(0 5px 8px #76553520);animation:memory-drift 12s ease-in-out infinite}.portal-memories img:nth-child(1){left:20px;top:315px;transform:rotate(-8deg)}.portal-memories img:nth-child(2){right:20px;top:495px;animation-delay:-4s;transform:rotate(6deg)}.portal-memories img:nth-child(3){left:205px;bottom:65px;animation-delay:-8s;transform:rotate(-3deg)}
 @keyframes memory-drift{0%,100%{opacity:.2;translate:0 8px}50%{opacity:.5;translate:0 -10px}}
 @keyframes screen-in{from{opacity:0}to{opacity:1}}@keyframes invite{0%,100%{filter:drop-shadow(0 9px 22px #193e6030)}50%{filter:drop-shadow(0 5px 32px #fff0cba0)}}@keyframes card-in{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:translateY(0)}}@keyframes paper-drift{0%,100%{transform:translateY(0) rotate(-.35deg)}50%{transform:translateY(-5px) rotate(.35deg)}}@keyframes count-in{from{opacity:.4;transform:scale(1.15)}to{opacity:1;transform:scale(1)}}@keyframes halo-breathe{0%,100%{opacity:.65;transform:scale(.97)}50%{opacity:1;transform:scale(1.06)}}@keyframes dial-turn{to{transform:rotate(360deg)}}@keyframes fallback-orbit{0%{transform:rotateX(30deg) rotateY(0)}100%{transform:rotateX(30deg) rotateY(360deg)}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}@media(max-width:500px){.operator-panel{padding:16px}.form-row{flex-direction:column;gap:0}.operator-panel footer{bottom:-16px}}
+
+.portal-center strong{font-size:54px;white-space:nowrap}
+
+.printer-slot{display:flex;align-items:center;gap:10px}.printer-slot>label{flex:1;min-width:0}.printer-order-controls{display:flex;gap:6px;flex-wrap:wrap}.printer-order-controls button{border:1px solid #c9c6bf;border-radius:5px;background:#e8e0d5;color:#173d63;padding:8px 10px;font-size:13px}
+
+/* Kiosk gestures should not select visitor-facing copy. */
+.stage{-webkit-user-select:none;user-select:none}
+.operator-panel input,.operator-panel textarea{-webkit-user-select:text;user-select:text}

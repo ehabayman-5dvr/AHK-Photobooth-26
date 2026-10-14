@@ -1,18 +1,23 @@
 import { defaultSettings } from './config';
 import type { DesktopBridge, Settings } from './types';
+import { GEMINI_IMAGE_MODEL, generateGeminiImage } from '../shared/gemini.mjs';
+import { buildSubjectDirective } from '../shared/face-prompt.mjs';
+import { createPromptLog, logCraftedPrompt } from '../shared/prompt-log.mjs';
 import prompts from '../shared/prompts.json';
 
 const storageKey = 'ahk75_browser_trial_settings';
 const keyStorage = 'ahk75_openai_api_key';
+const geminiStorage = 'ahk75_gemini_api_key';
 const cloudStorage = 'ahk75_cloudinary_api_secret';
 const env = import.meta.env;
 export function createBrowserTrialBridge(): DesktopBridge {
   const stored = () => { try { return JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch { return {}; } };
   const openAIKey = () => localStorage.getItem(keyStorage) || env.VITE_OPENAI_API_KEY || '';
+  const geminiKey = () => localStorage.getItem(geminiStorage) || env.VITE_GEMINI_API_KEY || '';
   const cloudSecret = () => localStorage.getItem(cloudStorage) || env.VITE_CLOUDINARY_API_SECRET || '';
   let settings: Settings = {
     ...defaultSettings,
-    model: env.VITE_OPENAI_MODEL || 'gpt-image-2',
+    model: env.VITE_OPENAI_MODEL || defaultSettings.model,
     demoMode: env.VITE_PREVIEW_MODE !== 'false',
     cloudName: env.VITE_CLOUDINARY_CLOUD_NAME || '',
     cloudKey: env.VITE_CLOUDINARY_API_KEY || '',
@@ -21,7 +26,7 @@ export function createBrowserTrialBridge(): DesktopBridge {
     viewerUrl: env.VITE_PHOTO_VIEWER_URL || defaultSettings.viewerUrl,
     ...stored(),
   };
-  const publicSettings = () => ({ ...settings, hasOpenAIKey: !!openAIKey(), hasCloudSecret: !!cloudSecret() });
+  const publicSettings = () => ({ ...settings, hasOpenAIKey: !!openAIKey(), hasGeminiKey: !!geminiKey(), hasCloudSecret: !!cloudSecret() });
   const photos = new Map<string, string>();
   let activeController: AbortController | undefined;
   let lastEra = '', variation = 0;
@@ -49,21 +54,26 @@ export function createBrowserTrialBridge(): DesktopBridge {
   }
   function reportMetric(era: string) {
     if (!settings.dashboardProjectId) return;
-    void fetch(`https://ai-photobooth-dashboard.vercel.app/api/projects/${encodeURIComponent(settings.dashboardProjectId)}/generate`, {
+    void fetch(`https://ai-photobooth-dashboard-brown.vercel.app/api/projects/${encodeURIComponent(settings.dashboardProjectId)}/generate`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ presetName: era, provider: 'openai', timestamp: Date.now() }), signal: AbortSignal.timeout(8000),
-    }).catch(() => {});
+      body: JSON.stringify({ presetName: era, provider: settings.model === GEMINI_IMAGE_MODEL ? 'gemini' : 'openai', timestamp: Date.now() }), signal: AbortSignal.timeout(8000),
+    }).then(response => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      console.info(`[Dashboard] Generation counted for project ${settings.dashboardProjectId}.`);
+    }).catch(error => console.warn('[Dashboard] Generation count failed:', error.message));
   }
   return {
     runtime: 'browser-trial',
     getSettings: async () => publicSettings(),
     saveSettings: async incoming => {
-      if (!['gpt-image-2', 'gpt-image-1.5'].includes(incoming.model)) throw new Error('Unsupported image model.');
-      if (!incoming.demoMode && !incoming.openAIKey?.trim() && !openAIKey()) throw new Error('Add VITE_OPENAI_API_KEY to .env.local or enter your key here.');
+      if (![GEMINI_IMAGE_MODEL, 'gpt-image-2.5-flare', 'gpt-image-2', 'gpt-image-1.5'].includes(incoming.model)) throw new Error('Unsupported image model.');
+      const isGemini = incoming.model === GEMINI_IMAGE_MODEL;
+      if (!incoming.demoMode && !(isGemini ? incoming.geminiKey?.trim() || geminiKey() : incoming.openAIKey?.trim() || openAIKey())) throw new Error(`Add the ${isGemini ? 'Gemini' : 'OpenAI'} API key in F2 or .env.local before enabling live generation.`);
       if (!Number.isFinite(incoming.resultSeconds) || incoming.resultSeconds < 30 || incoming.resultSeconds > 300) throw new Error('Result reset must be between 30 and 300 seconds.');
       if (new URL(incoming.viewerUrl).protocol !== 'https:') throw new Error('Viewer URL must use HTTPS.');
-      const { openAIKey: nextKey, cloudSecret: nextSecret, ...next } = incoming;
+      const { openAIKey: nextKey, geminiKey: nextGeminiKey, cloudSecret: nextSecret, ...next } = incoming;
       if (nextKey?.trim()) localStorage.setItem(keyStorage, nextKey.trim());
+      if (nextGeminiKey?.trim()) localStorage.setItem(geminiStorage, nextGeminiKey.trim());
       if (nextSecret?.trim()) localStorage.setItem(cloudStorage, nextSecret.trim());
       settings = next; localStorage.setItem(storageKey, JSON.stringify(next));
       return publicSettings();
@@ -72,17 +82,25 @@ export function createBrowserTrialBridge(): DesktopBridge {
     enterKiosk: async () => {},
     onAdmin: () => () => {},
     cancelGeneration: async () => activeController?.abort(),
-    generate: async (photo, era) => {
-      if (!openAIKey()) throw new Error('Add VITE_OPENAI_API_KEY to .env.local or enter the key in F2 settings.');
+    generate: async (photo, era, faces) => {
+      const isGemini = settings.model === GEMINI_IMAGE_MODEL;
+      if (!(isGemini ? geminiKey() : openAIKey())) throw new Error(`Add the ${isGemini ? 'Gemini' : 'OpenAI'} API key in F2 or .env.local.`);
       if (activeController) throw new Error('A photo is already being generated.');
       const themes = prompts.eras[era as keyof typeof prompts.eras];
       if (!themes) throw new Error('Unknown era.');
       if (lastEra !== era) variation = 0; lastEra = era;
       const [scene, outfit] = themes[variation % themes.length];
-      const prompt = prompts.template.replace('{{SCENE}}', scene).replace('{{OUTFIT}}', outfit);
+      const prompt = prompts.template.replace('{{SCENE}}', scene).replace('{{OUTFIT}}', outfit).replace('{{SUBJECT_DESCRIPTION}}', buildSubjectDirective(faces));
       const controller = new AbortController(); activeController = controller;
       const timeout = setTimeout(() => controller.abort(), 180000);
       try {
+        const logPrompt = () => logCraftedPrompt(createPromptLog({ model: settings.model, era, variation, faces, prompt, quality: settings.quality }));
+        if (isGemini) {
+          logPrompt();
+          const image = await generateGeminiImage({ photo, prompt, key: geminiKey(), signal: controller.signal });
+          variation = (variation + 1) % themes.length; reportMetric(era);
+          return { image, demo: false };
+        }
         const capture = /^data:image\/(png|jpeg);base64,([A-Za-z0-9+/=]+)$/.exec(photo);
         if (!capture) throw new Error('Expected a captured PNG or JPEG photo.');
         const image = new Blob([Uint8Array.from(atob(capture[2]), byte => byte.charCodeAt(0))], { type: `image/${capture[1]}` });
@@ -92,6 +110,7 @@ export function createBrowserTrialBridge(): DesktopBridge {
         form.append('size', '1024x1536'); form.append('quality', settings.quality);
         form.append('output_format', 'png'); form.append('n', '1');
         if (settings.model === 'gpt-image-1.5') form.append('input_fidelity', 'high');
+        logPrompt();
         const response = await fetch('https://api.openai.com/v1/images/edits', { method: 'POST', headers: { Authorization: `Bearer ${openAIKey()}` }, body: form, signal: controller.signal });
         const data = await response.json();
         if (!response.ok) throw new Error(`Image generation (${response.status}): ${data.error?.message || 'Please try again.'}`);

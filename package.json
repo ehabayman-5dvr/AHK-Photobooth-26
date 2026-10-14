@@ -15,8 +15,10 @@
     "test": "node --test tests/*.test.cjs tests/*.test.mjs",
     "check:secrets": "node scripts/check-git-secrets.mjs --working",
     "test:e2e": "playwright test",
-    "electron:build": "npm run build && electron-builder --win portable",
-    "electron:unpacked": "npm run build && electron-builder --dir"
+    "electron:build": "npm run build && node scripts/package-desktop.mjs portable && npm run desktop:seed && npm run desktop:seed -- release/win-unpacked",
+    "electron:unpacked": "npm run build && node scripts/package-desktop.mjs unpacked && npm run desktop:seed -- release/win-unpacked",
+    "desktop:seed": "node scripts/seed-desktop-config.mjs",
+    "icons": "node scripts/create-app-icons.mjs"
   },
   "build": {
     "appId": "com.5dvr.ahk75.photobooth",
@@ -35,10 +37,19 @@
     "win": {
       "target": "portable",
       "artifactName": "AHK-75-Photobooth-${version}-Portable.exe",
-      "signAndEditExecutable": false
-    }
+      "signAndEditExecutable": true,
+      "icon": "public/icons/app-icon.ico",
+      "signExecutable": false
+    },
+    "extraResources": [
+      {
+        "from": "release/build-config/operator-defaults.json",
+        "to": "operator-defaults.json"
+      }
+    ]
   },
   "dependencies": {
+    "face-api.js": "^0.22.2",
     "qrcode": "^1.5.4",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

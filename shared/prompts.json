@@ -12,6 +12,14 @@
       [
         "An early 1970s Nile promenade with historic Cairo buildings and a felucca in the distance.",
         "Elegant early 1970s smart attire, subtle patterns, fully covered shoulders and torsos."
+      ],
+      [
+        "Heliopolis in the late 1950s: elegant arcaded facades, broad palm-lined streets and period sedans in clear morning daylight. Exclude modern vehicles and contemporary signage.",
+        "Late-1950s lightweight wool blazers, crisp collared shirts and tailored trousers; modest long-sleeved shirt dresses or matching full-length ensembles in ivory, dusty blue and warm brown."
+      ],
+      [
+        "A riverside garden on Gezira Island in mid-1960s Cairo: mature palms, shaded stone paths, the Nile and distant Cairo Tower in warm afternoon daylight. Keep architecture and street details appropriate to the 1960s.",
+        "Mid-1960s refined daytime tailoring: lightweight linen jackets, fine-knit tops over opaque shirts, straight-cut trousers, modest long-sleeved dresses or coordinated skirts and blouses in muted olive, cream and navy."
       ]
     ],
     "opportunities": [
@@ -26,6 +34,14 @@
       [
         "A late-1970s Heliopolis street with arcaded facades, palm trees, period cars and bright daylight.",
         "Late-1970s tailored everyday garments and modest period dresses, warm earth tones."
+      ],
+      [
+        "A leafy Maadi residential avenue in late-1980s Cairo: low-rise villas, garden walls, mature trees and period cars under bright soft daylight. No post-2001 skyline, vehicles or devices.",
+        "Late-1980s polished everyday attire: softly structured blazers, opaque collared shirts and pleated trousers; modest long-sleeved blouses with full-length skirts or coordinated trousers in burgundy, sand and deep blue."
+      ],
+      [
+        "A Cairo riverside hotel terrace around 2000: understated stone balustrades, the Nile, feluccas and established city buildings in luminous golden-hour daylight. Keep the setting within 1975-2001, without later developments.",
+        "Turn-of-the-millennium business attire: clean-cut single-breasted jackets, light shirts and tailored trousers; modest long-sleeved blazers, blouses and full-length ensembles in charcoal, cream and muted teal."
       ]
     ],
     "tomorrow": [
@@ -40,8 +56,16 @@
       [
         "Contemporary Zamalek on the Nile with Cairo Tower, a tasteful urban riverfront and warm afternoon light.",
         "Polished contemporary gala-inspired daywear in understated navy, warm beige and earth tones."
+      ],
+      [
+        "Cairo in the early 2010s: a landscaped contemporary business plaza with glass-and-stone office facades, palms and subtle urban details in crisp sunny daylight. Use realistic architecture from the 2001-2026 era, with no speculative future elements.",
+        "Early-2010s professional smart-casual clothing: lightweight unstructured blazers, opaque cotton shirts and tailored chinos; modest long-sleeved tunics, blouses or matching trouser ensembles in slate blue, soft beige and olive."
+      ],
+      [
+        "Heliopolis in the 2020s: restored historic arcades, contemporary cafes with no readable signage, landscaped pedestrian spaces and modern street details in bright late-afternoon daylight. Retain a realistic present-day Cairo setting within 2001-2026.",
+        "2020s refined contemporary daywear: relaxed linen tailoring, crisp opaque crewneck tops layered under jackets and straight-cut trousers; modest long-sleeved blouses, flowing full-length dresses or coordinated separates in cream, sage and navy."
       ]
     ]
   },
-  "template": "Create one photorealistic portrait for the German-Arab Chamber of Industry and Commerce (AHK Egypt) 75th anniversary photobooth. The input image is the sole identity reference.\nKeep EVERY participant and the exact number of people. Preserve their facial identity, apparent age, natural skin tone, eyes, nose, jaw, wrinkles, facial hair, hair texture, expression and gaze. Do not beautify, reshape faces, invent people, or change expressions. Keep each person immediately recognizable.\nChange ONLY attire and environment. Clothing: {{OUTFIT}}\nPreserve any religious or cultural headcover that is visible in the input, naturally draped, coordinated with the outfit. Preserve exposed hair when no headcover is present. Every person must have opaque clothing covering torso, chest and shoulders. Retain individual clothing preferences without guessing demographic labels.\nEnvironment: {{SCENE}}\nOutput a single coherent 2:3 portrait, never a collage. Match the reference pose and framing. Keep all faces inside the central safe area, at least 15% from the top and 12% from the sides for the anniversary frame. Use natural skin texture, convincing lighting and shadows, print-friendly brightness and realistic hands. No added text, dates, logos, watermark, border, spacesuits, robotic armor or extra people. An anniversary frame will be applied separately."
+  "template": "Create one photorealistic portrait for the German-Arab Chamber of Industry and Commerce (AHK Egypt) 75th anniversary photobooth. The input image is the sole identity reference.\n{{SUBJECT_DESCRIPTION}}\nKeep EVERY participant and the exact number of people. Preserve their facial identity, apparent age, natural skin tone, eye shape, eyelid folds, eyebrows, nose, jaw, lips, smile geometry, wrinkles, moles, facial hair, hair texture, expression and gaze. Do not beautify, smooth skin, morph or average faces, reshape faces, invent people, or change expressions. Keep each person immediately recognizable.\nChange ONLY attire and environment. Clothing: {{OUTFIT}}\nPreserve any religious or cultural headcover that is visible in the input, naturally draped, coordinated with the outfit. Preserve exposed hair when no headcover is present. Every person must have opaque clothing covering torso, chest and shoulders. Retain individual clothing preferences; use local gender estimates only as outfit guidance and defer to the photo.\nEnvironment: {{SCENE}}\nOutput a single coherent 2:3 portrait, never a collage. Match the reference pose and framing. Keep all faces inside the central safe area, at least 15% from the top and 12% from the sides for the anniversary frame. Use natural skin texture, convincing lighting and shadows, print-friendly brightness and realistic hands. No added text, dates, logos, watermark, border, spacesuits, robotic armor or extra people. An anniversary frame will be applied separately."
 }

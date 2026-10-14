@@ -25,3 +25,6 @@ playwright-report/
 artifacts/
 *.log
 *.example
+
+# Local Electron encryption profiles and runtime storage
+**/.electron-data/

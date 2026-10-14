@@ -123,3 +123,8 @@
   .result-frame-sheen { display: none; }
   .result-time-track i { transition: none; }
 }
+
+.qr-loading{display:flex;align-items:center;justify-content:center;width:248px;height:248px;box-sizing:border-box}
+.qr-loading-spinner{width:72px;height:72px;border:7px solid #c3935f40;border-top-color:#173d63;border-right-color:#c3935f;border-radius:50%;animation:qr-loading-spin 1s linear infinite}
+@keyframes qr-loading-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.qr-loading-spinner{animation:none}}

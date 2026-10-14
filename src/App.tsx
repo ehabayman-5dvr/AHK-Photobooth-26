@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { analyzePhoto, loadFaceModels } from './faceAnalysis';
+import type { FaceSummary } from '../shared/face-prompt.mjs';
+import { logCraftedPrompt } from '../shared/prompt-log.mjs';
 import QRCode from 'qrcode';
 import Camera from './Camera';
 import Loading from './Loading';
@@ -20,6 +23,7 @@ export default function App() {
   const [photo, setPhoto] = useState('');
   const [result, setResult] = useState('');
   const [qr, setQr] = useState('');
+  const [sharingLoading, setSharingLoading] = useState(false);
   const [delivery, setDelivery] = useState<Delivery | null>(null);
   const [deliveryStatus, setDeliveryStatus] = useState('');
   const [error, setError] = useState('');
@@ -32,6 +36,7 @@ export default function App() {
   const [scale, setScale] = useState(1);
   const [booted, setBooted] = useState(!window.booth);
   const runId = useRef(0), printLock = useRef(false), proceedLock = useRef(false), settingsRef = useRef(settings);
+  const faceAnalysis = useRef<Promise<FaceSummary | null>>(Promise.resolve(null));
   const hotzone = useRef({ taps: 0, at: 0 });
   const fullscreenPending = useRef(false);
   const enterBrowserFullscreen = () => {
@@ -44,6 +49,8 @@ export default function App() {
       .finally(() => { fullscreenPending.current = false; });
   };
   settingsRef.current = settings;
+  useEffect(() => window.booth?.onPromptLog?.(details => logCraftedPrompt(details)), []);
+  useEffect(() => { void loadFaceModels().catch(() => {}); }, []);
   useEffect(() => {
     const timers = new Map<HTMLButtonElement, ReturnType<typeof setTimeout>>();
     const confirmClick = (event: MouseEvent) => {
@@ -71,7 +78,7 @@ export default function App() {
   }, []);
   const reset = useCallback(() => {
     runId.current++; void window.booth?.cancelGeneration();
-    setPhoto(''); setResult(''); setQr(''); setDelivery(null); setError(''); setPrintError(''); setDeliveryStatus('');
+    setPhoto(''); setResult(''); setQr(''); setSharingLoading(false); setDelivery(null); setError(''); setPrintError(''); setDeliveryStatus('');
     setPrinted(false); setPrinting(false); printLock.current = false; proceedLock.current = false; setScreen('start');
   }, []);
   useEffect(() => {
@@ -92,12 +99,15 @@ export default function App() {
         generated = asset(`demo-${era.image}.jpg`);
       } else {
         if (!window.booth) throw new Error('Open the Electron desktop app for live image generation.');
-        generated = (await window.booth.generate(photo, era.id)).image;
+        const faces = await faceAnalysis.current;
+        if (currentRun !== runId.current) return;
+        generated = (await window.booth.generate(photo, era.id, faces)).image;
       }
       if (currentRun !== runId.current) return;
       const composed = await compositePhoto(generated, era);
       if (currentRun !== runId.current) return;
       setResult(composed); setResultLeft(config.resultSeconds); setScreen('result');
+      setSharingLoading(!config.demoMode && !!window.booth);
       setDeliveryStatus(config.demoMode ? 'Preview portrait · no QR upload' : 'Preparing your download…');
       if (window.booth) {
         try {
@@ -110,11 +120,12 @@ export default function App() {
             if (currentRun === runId.current) { setQr(code); setDeliveryStatus('Scan to get your photo'); }
           } else setDeliveryStatus(config.demoMode ? 'Preview portrait · no QR upload' : window.booth.runtime === 'browser-trial' ? 'QR sharing unavailable · retry or ask the operator' : 'Saved locally · QR sharing unavailable');
         } catch { if (currentRun === runId.current) setDeliveryStatus('Photo delivery unavailable · please ask the operator'); }
+        finally { if (currentRun === runId.current) setSharingLoading(false); }
       }
     } catch (e) { if (currentRun === runId.current) setError(e instanceof Error ? e.message : 'Could not create the portrait. Please try again.'); }
   }, [era, photo]);
   const proceed = useCallback(() => { if (proceedLock.current) return; proceedLock.current = true; void startGeneration(); }, [startGeneration]);
-  const capture = useCallback((image: string) => { setPhoto(image); setPreviewLeft(5); proceedLock.current = false; setScreen('preview'); }, []);
+  const capture = useCallback((image: string) => { faceAnalysis.current = analyzePhoto(image); setPhoto(image); setPreviewLeft(5); proceedLock.current = false; setScreen('preview'); }, []);
   useEffect(() => {
     if (screen !== 'preview' || admin) return;
     const end = performance.now() + previewLeft * 1000;
@@ -140,8 +151,9 @@ export default function App() {
     finally { setPrinting(false); }
   };
   const retrySharing = async () => {
-    if (!window.booth || !delivery?.path) return;
+    if (!window.booth || !delivery?.path || sharingLoading) return;
     const currentRun = runId.current;
+    setSharingLoading(true);
     setDeliveryStatus('Reconnecting photo sharing…');
     try {
       const uploaded = await window.booth.retryUpload(delivery.path);
@@ -149,6 +161,7 @@ export default function App() {
       const code = await QRCode.toDataURL(viewer.href, { width: 512, margin: 3, errorCorrectionLevel: 'M' });
       if (currentRun === runId.current) { setQr(code); setDeliveryStatus('Scan to get your photo'); }
     } catch { if (currentRun === runId.current) setDeliveryStatus(window.booth?.runtime === 'browser-trial' ? 'Sharing unavailable · please ask the operator' : 'Photo saved locally · ask the operator for your copy'); }
+    finally { if (currentRun === runId.current) setSharingLoading(false); }
   };
   const closeAdmin = () => { setAdmin(false); void window.booth?.enterKiosk(); };
   return <main className="app" onClickCapture={enterBrowserFullscreen}>
@@ -163,7 +176,7 @@ export default function App() {
     {screen === 'preview' && <section className="screen preview-screen" aria-label="Review your photo"><img className="preview-photo" src={photo} alt="Your captured photo"/><div className="preview-shade"/><div className="preview-controls"><p>Continuing in <strong>{Math.ceil(previewLeft)}</strong> seconds</p><div className="retake-track"><i style={{ transform: `scaleX(${previewLeft / 5})` }}/></div><button className="pill retake-button" onClick={retake}><Icon kind="retake"/>Retake</button></div></section>}
     {screen === 'loading' && <Loading era={era} error={error} onRetry={() => void startGeneration()} onRetake={retake}/>}
     {screen === 'result' && <section className="screen result-screen" aria-label="Your anniversary portrait"><h1>Your photo<span>is ready</span></h1><ResultPortrait image={result} era={era}/>
-      <div className="sharing">{qr ? <div className="qr-frame"><img className="qr" src={qr} alt="Scan to download your photo"/><span className="qr-surround" aria-hidden="true"/></div> : <div className="sharing-placeholder"><span className="keepsake-stamp" aria-hidden="true">75</span><span>{settings.demoMode ? 'PREVIEW PHOTO' : 'QR CODE UNAVAILABLE'}</span></div>}<p role="status">{deliveryStatus}</p>{!qr && !settings.demoMode && delivery?.path && <button className="text-button retry-sharing" onClick={() => void retrySharing()}>Retry photo sharing</button>}</div>
+      <div className="sharing">{qr ? <div className="qr-frame"><img className="qr" src={qr} alt="Scan to download your photo"/><span className="qr-surround" aria-hidden="true"/></div> : sharingLoading ? <div className="qr-frame qr-loading" aria-label="Preparing QR code" aria-busy="true"><span className="qr-loading-spinner" aria-hidden="true"/></div> : <div className="sharing-placeholder"><span className="keepsake-stamp" aria-hidden="true">75</span><span>{settings.demoMode ? 'PREVIEW PHOTO' : 'QR CODE UNAVAILABLE'}</span></div>}<p role="status">{deliveryStatus}</p>{!qr && !sharingLoading && !settings.demoMode && delivery?.path && <button className="text-button retry-sharing" onClick={() => void retrySharing()}>Retry photo sharing</button>}</div>
       <div className="result-actions"><button onClick={reset} disabled={printing}><i><Icon kind="retake"/></i><span>New photo</span></button><button onClick={() => void print()} disabled={printing || printed}><i><Icon kind="print"/></i><span>{printing ? 'Printing…' : printed ? 'Print sent' : 'Print'}</span></button></div>
       {printError && <p className="print-error" role="alert">{printError}</p>}
       <small className="result-reset">Resetting in {resultLeft}s</small><div className="result-time-track" aria-hidden="true"><i style={{ width: `${Math.max(0, Math.min(100, resultLeft / settings.resultSeconds * 100))}%` }}/></div>

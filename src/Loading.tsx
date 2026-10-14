@@ -3,7 +3,7 @@ import { asset, type Era } from './config';
 import Gyroscope from './Gyroscope';
 import AnniversaryMark from './AnniversaryMark';
 
-export default function Loading({ era, error, onRetry, onRetake }: { era: Era; error: string; onRetry: () => void; onRetake: () => void }) {
+export default function Loading({ error, onRetry, onRetake }: { era: Era; error: string; onRetry: () => void; onRetake: () => void }) {
   const [elapsed, setElapsed] = useState(0);
   const [touch, setTouch] = useState({ x: 0, y: 0 });
   useEffect(() => { const id = setInterval(() => setElapsed(v => v + 1), 1000); return () => clearInterval(id); }, []);
@@ -14,8 +14,6 @@ export default function Loading({ era, error, onRetry, onRetake }: { era: Era; e
     <div className="time-portal" style={{ transform: `translate(${touch.x * 18}px, ${touch.y * 14}px)` }}>
       <div className="portal-halo"/><div className="portal-dial"/><Gyroscope portal/>
       <div className="portal-memories" aria-hidden="true">{[1, 2, 3].map(i => <img key={i} src={asset(`era-image-${i}.png`)} alt=""/>)}</div>
-      <div className="portal-center"><small>SELECTED ERA</small><strong>{era.years.split(' – ')[0]}</strong><span>{era.title}</span></div>
-      <div className="portal-years"><span>1951</span><span>1975</span><span>2001</span><span>2026</span></div>
     </div>
     <div className="loading-copy">
       <h1>{error ? 'Unable to process photo' : 'Processing photo'}</h1>

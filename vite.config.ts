@@ -9,7 +9,7 @@ export default defineConfig(({ command }) => ({
     name: 'local-browser-trial-csp',
     transformIndexHtml(html, context) {
       if (!context.server) return html;
-      return html.replace("connect-src 'self' ws://127.0.0.1:5173;", "connect-src 'self' ws://127.0.0.1:5173 https://api.openai.com https://api.cloudinary.com https://ai-photobooth-dashboard.vercel.app;");
+      return html.replace("connect-src 'self' ws://127.0.0.1:5173;", "connect-src 'self' ws://127.0.0.1:5173 https://api.openai.com https://generativelanguage.googleapis.com https://api.cloudinary.com https://ai-photobooth-dashboard-brown.vercel.app;");
     },
   }], base: './', server: { host: '127.0.0.1', port: 5173, strictPort: true },
   build: { outDir: 'dist' },
